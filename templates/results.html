@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Evaluation results | CarbonWise AI{% endblock %}
+{% block content %}
+<section class="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end">
+  <div><p class="text-xs font-bold uppercase tracking-widest text-emerald-700">Evaluation complete</p><h1 class="mt-2 text-3xl font-extrabold text-slate-900">Carbon emission results</h1><p class="mt-2 text-sm text-slate-500">{{ evaluation.filename }} · {{ evaluation.created_at|date:"M j, Y H:i" }}</p></div>
+  <div class="flex gap-2"><a href="{% url 'report' evaluation.id %}" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white">Download CSV report</a><a href="{% url 'home' %}" class="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">New evaluation</a></div>
+</section>
+<section class="mt-6 grid gap-5 md:grid-cols-2">
+  <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm">
+    <p class="text-sm font-semibold text-slate-500">Calculated emissions</p>
+    <p class="mt-3 text-4xl font-extrabold tracking-tight text-slate-900">{{ calculated_emission|default:"—" }} <span class="text-base font-semibold text-slate-500">tCO₂e</span></p>
+    <p class="mt-4 text-xs text-slate-500">Total reported emissions, converted to tonnes CO₂e.</p>
+  </div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="text-sm font-semibold text-slate-500">Expected emissions target</p>
+    <p class="mt-3 text-4xl font-extrabold tracking-tight text-slate-900">{{ expected_emission|default:"—" }} <span class="text-base font-semibold text-slate-500">tCO₂e</span></p>
+    <p class="mt-4 text-sm font-semibold {% if calculated_emission and expected_emission and calculated_emission > expected_emission %}text-amber-700{% else %}text-emerald-700{% endif %}">{{ comparison_status|default:"Comparison status will appear here" }}</p>
+  </div>
+</section>
+<section class="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="text-xl font-bold text-slate-900">Emission breakdown</h2>
+  <p class="mt-1 text-sm text-slate-500">Scope totals in tonnes of CO₂ equivalent.</p>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Scope 1 · Direct</p><p class="mt-2 text-xl font-bold">{{ scope1_emission|default:"—" }}</p></div>
+    <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Scope 2 · Electricity</p><p class="mt-2 text-xl font-bold">{{ scope2_emission|default:"—" }}</p></div>
+    <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Scope 3 · Other indirect</p><p class="mt-2 text-xl font-bold">{{ scope3_emission|default:"0" }}</p></div>
+  </div>
+</section>
+{% if evaluation.validation_issues %}<section class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-6"><h2 class="font-bold text-amber-900">Rows needing review</h2><ul class="mt-2 list-disc pl-5 text-sm text-amber-900">{% for issue in evaluation.validation_issues %}<li>{{ issue }}</li>{% endfor %}</ul></section>{% endif %}
+<section class="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 class="text-xl font-bold">Calculated activity rows</h2><div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr><th class="p-2">Activity</th><th class="p-2">Scope</th><th class="p-2">kg CO₂e</th><th class="p-2">t CO₂e</th></tr></thead><tbody>{% for row in evaluation.rows %}<tr class="border-t"><td class="p-2">{{ row.activity }}</td><td class="p-2">{{ row.scope|upper }}</td><td class="p-2">{{ row.emissions_kg }}</td><td class="p-2">{{ row.emissions_tonnes }}</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="mt-5 rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm">
+  <div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-xl">✦</span><div><p class="text-xs font-bold uppercase tracking-widest text-emerald-700">Retrieval-augmented guidance</p><h2 class="mt-1 text-xl font-bold text-slate-900">Recommendations and cited guidelines</h2></div></div>
+  {% if guidance.message %}<p class="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{{ guidance.message }}</p>{% endif %}
+  {% for section in guidance.sections %}<article class="mt-5 rounded-xl border border-slate-200 p-4"><h3 class="font-bold text-slate-900">{{ section.label }}</h3><p class="mt-2 text-sm leading-6 text-slate-700"><strong>Suggested review:</strong> {{ section.review_check }}</p>
+    {% if section.evidence %}<h4 class="mt-4 text-xs font-bold uppercase tracking-wide text-slate-500">Retrieved guidance</h4><ul class="mt-2 space-y-3">{% for item in section.evidence %}<li class="rounded-lg bg-slate-50 p-3"><p class="whitespace-pre-line text-sm leading-6 text-slate-700">{{ item.text }}</p><p class="mt-2 text-xs font-semibold text-emerald-800">Source: {{ item.source_filename }}, page {{ item.page_number }}</p></li>{% endfor %}</ul>{% else %}<p class="mt-3 text-sm text-slate-500">No cited passage was retrieved for this scope.</p>{% endif %}
+  </article>{% empty %}<p class="mt-4 text-sm text-slate-600">No scope guidance is available for this evaluation yet.</p>{% endfor %}
+  <p class="mt-5 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-500">The suggested checks are decision support. Retrieved text is cited from the supplied guidance PDFs and is not proof of an error or a compliance verdict. Verify applicability before formal reporting.</p>
+</section>
+{% endblock %}

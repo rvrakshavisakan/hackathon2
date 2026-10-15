@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Processing | CarbonWise AI{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-2xl py-12 text-center">
+  <div class="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-emerald-100 border-t-emerald-700 bg-white text-4xl shadow-sm animate-spin">↻</div>
+  <p class="mt-8 text-xs font-bold uppercase tracking-widest text-emerald-700">Evaluation in progress</p>
+  <h1 class="mt-2 text-3xl font-extrabold text-slate-900">Analysing your steel emissions</h1>
+  <p class="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">Your workbook is being processed. The backend should validate the data, calculate emissions, compare the target and retrieve relevant guidance.</p>
+  <div class="mx-auto mt-8 max-w-lg rounded-2xl border border-slate-200 bg-white p-5 text-left">
+    <div class="mb-4 flex items-center justify-between text-sm"><span class="font-semibold">Processing status</span><span class="text-emerald-700">Please wait…</span></div>
+    <div class="h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-2/3 rounded-full bg-emerald-600 animate-pulse"></div></div>
+    <ul class="mt-5 space-y-3 text-sm text-slate-600">
+      <li>✓ Receive and validate workbook</li>
+      <li>↻ Calculate carbon emissions from available data</li>
+      <li>○ Compare actual emissions with the target</li>
+      <li>○ Retrieve RAG-based guidance</li>
+    </ul>
+  </div>
+  <p class="mt-5 text-xs text-slate-400">This screen is a template. Connect it to a real task-status endpoint if processing runs in the background.</p>
+</section>
+{% endblock %}
